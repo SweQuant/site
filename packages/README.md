@@ -2,7 +2,7 @@
 
 Each file in this folder is a self-contained module that mirrors a section of the provided stylesheet. Reference only the modules you need inside Webflow so that edits stay isolated.
 
-If you prefer to load a single stylesheet, use `bundle.css`. It imports every module in this directory and is compatible with the Webflow snippet that fetches `packages/bundle.css` through jsDelivr.
+If you prefer to load a single stylesheet, use `bundle.css`. It imports every module in this directory and is compatible with the Webflow head snippet below that fetches `packages/bundle.css` through jsDelivr.
 
 - `vars-anchor.css` – Global CSS variables for the navigation component and anchor offset behavior.
 - `cad-grid.css` – CAD grid background helper classes and layering rules.
@@ -32,6 +32,47 @@ Add one `<link>` tag per module inside **Project Settings → Custom Code → He
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/USERNAME/REPO@TAG/packages/bundle.css" />
 ```
 
-When you update any CSS module (or the bundle), bump the numeric stamp in `version.txt`. The Webflow snippet appends this stamp as a `?v=` query parameter so jsDelivr will serve the newest files without waiting for CDN cache expiry.
+### Recommended Webflow head snippet
 
-Replace `USERNAME`, `REPO`, and `TAG` with your GitHub username, repository name, and release tag or branch (e.g. `@main`). Clear the Webflow published site cache if you update a file so jsDelivr serves the latest version.
+Paste this into **Project Settings → Custom Code → Head** to automatically load the newest bundle while keeping a flash-free fallback. Update the `lastKnown` stamp with the most recently published value from `version.txt`.
+
+```html
+<!-- Always-load-latest bundle.css from GitHub via jsDelivr -->
+<script>
+(function () {
+  var base = "https://cdn.jsdelivr.net/gh/SweQuant/site@main/packages/bundle.css";
+  var vUrl = "https://cdn.jsdelivr.net/gh/SweQuant/site@main/version.txt";
+
+  // OPTIONAL: set your last-known good stamp to avoid any flash
+  var lastKnown = "001202409271400"; // update alongside version.txt; Actions will replace it after publish
+
+  // Preload with last-known (so there is no FOUC)
+  var preload = document.createElement('link');
+  preload.rel = 'stylesheet';
+  preload.href = base + "?v=" + encodeURIComponent(lastKnown);
+  document.head.appendChild(preload);
+
+  // Swap to truly-latest as soon as version.txt is fetched
+  fetch(vUrl, { cache: 'no-store' })
+    .then(function (r) { return r.text(); })
+    .then(function (v) {
+      v = (v || "").trim();
+      if (!v || v === lastKnown) return; // already fine
+      preload.href = base + "?v=" + encodeURIComponent(v);
+    })
+    .catch(function () {
+      // leave the lastKnown link in place
+    });
+})();
+</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/SweQuant/site@main/packages/bundle.css?v=noscript" />
+```
+
+### Tracking the deployed version
+
+`version.txt` uses a sortable numeric stamp prefixed with `001` (e.g. `001YYYYMMDDHHMM`). Whenever you update any CSS module or the bundle, bump this value and update the `lastKnown` constant above so Webflow preloads the same build you just deployed.
+
+On the published Webflow site, open the page source (or Network tab) and inspect any `cdn.jsdelivr.net` stylesheet URL. The trailing `?v=` query parameter shows which version is currently live, making it easy to confirm that Webflow is serving the latest bundle.
+
+Replace `USERNAME`, `REPO`, and `TAG` with your GitHub username, repository name, and release tag or branch (e.g. `@main`). Clear the Webflow published site cache after updating a file so jsDelivr serves the latest version immediately.

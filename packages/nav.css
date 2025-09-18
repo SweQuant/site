@@ -3,8 +3,9 @@
 .nav-shell{
   position:absolute !important; top:var(--nav-top,28px); left:0; right:0;
   display:flex; justify-content:center;
-  pointer-events:auto !important; z-index:2147483600 !important;
+  pointer-events:none !important; z-index:2147483600 !important;
 }
+.nav-shell > *{ pointer-events:none !important; }
 .nav-row{ width:min(1180px,92vw); padding:0 6px; }
 .nav-glass{
   pointer-events:auto !important; position:relative; z-index:2147483601 !important;
