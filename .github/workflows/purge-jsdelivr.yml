@@ -1,67 +1,45 @@
-name: Purge jsDelivr cache
+name: Purge jsDelivr Cache
 
 on:
   push:
-    branches: [ main, master ]
-    tags: [ "*" ]  # optional: also purge when you publish tags/releases
-  workflow_dispatch: {}
+    branches: [ main ]
+    # Optional: only run when these folders change
+    paths:
+      - 'packages/**'
+      - 'scripts/**'
+      - '.github/workflows/purge-jsdelivr.yml'
 
 jobs:
   purge:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-
-      - name: Compute changed files
-        id: diff
-        run: |
-          set -e
-          BEFORE_SHA="${{ github.event.before }}"
-          AFTER_SHA="${{ github.sha }}"
-          if [ -z "$BEFORE_SHA" ]; then
-            # first push or manual run: just scan repo
-            CHANGED=$(git ls-files | tr '\n' ' ')
-          else
-            CHANGED=$(git diff --name-only "$BEFORE_SHA" "$AFTER_SHA" | tr '\n' ' ')
-          fi
-          echo "changed=$CHANGED" >> $GITHUB_OUTPUT
-
-      - name: Filter to .css / .js in packages/
+      - name: Build list of files to purge
         id: files
         run: |
-          set -e
-          LIST="${{ steps.diff.outputs.changed }}"
-          OUT=""
-          for f in $LIST; do
-            case "$f" in
-              packages/*.css|packages/*.js)
-                OUT="$OUT $f"
-                ;;
-            esac
-          done
-          echo "files=$OUT" >> $GITHUB_OUTPUT
+          FILES=()
+          # ====== LIST EVERY ASSET YOUR WEBFLOW LINKS USE ======
+          FILES+=("https://purge.jsdelivr.net/gh/SweQuant/site@main/packages/vars-anchor.css")
+          FILES+=("https://purge.jsdelivr.net/gh/SweQuant/site@main/packages/nav.css")
+          FILES+=("https://purge.jsdelivr.net/gh/SweQuant/site@main/packages/cad-grid.css")
+          FILES+=("https://purge.jsdelivr.net/gh/SweQuant/site@main/packages/bg-nonlinear.css")
+          FILES+=("https://purge.jsdelivr.net/gh/SweQuant/site@main/packages/reveal.css")
+          FILES+=("https://purge.jsdelivr.net/gh/SweQuant/site@main/packages/wipe-heading.css")
+          FILES+=("https://purge.jsdelivr.net/gh/SweQuant/site@main/packages/button-eclipse.css")
 
-      - name: Purge jsDelivr for each changed file (latest + tag)
-        if: ${{ steps.files.outputs.files != '' }}
-        env:
-          USER: YOUR_USER
-          REPO: YOUR_REPO
+          # If you also host JS, add them here the same way:
+          # FILES+=("https://purge.jsdelivr.net/gh/SweQuant/site@main/scripts/whatever.js")
+
+          printf "%s\n" "${FILES[@]}" > urls.txt
+          echo "count=$(wc -l < urls.txt)" >> $GITHUB_OUTPUT
+
+      - name: Purge each file
         run: |
-          set -e
-          # If this push is a tag (refs/tags/v1.2.3), extract it
-          REF="${GITHUB_REF##*/}"   # branch or tag name
-          IS_TAG="${{ startsWith(github.ref, 'refs/tags/') && 'yes' || 'no' }}"
-          for f in ${{ steps.files.outputs.files }}; do
-            echo "Purging $f"
-            # Purge the @latest URL so Webflow tags pick it up immediately
-            curl -fsS "https://purge.jsdelivr.net/gh/$USER/$REPO@latest/$f" || true
-            # If this was a tag push, also purge the versioned path (nice to have)
-            if [ "$IS_TAG" = "yes" ]; then
-              curl -fsS "https://purge.jsdelivr.net/gh/$USER/$REPO@$REF/$f" || true
-            fi
-          done
-          echo "Purge requests sent."
+          while read -r URL; do
+            echo "Purging: $URL"
+            # Add a tiny delay to be polite
+            curl -fsS -X GET "$URL" || true
+            sleep 0.4
+          done < urls.txt
+
+      - name: Summary
+        run: echo "Purged $(wc -l < urls.txt) url(s)."
