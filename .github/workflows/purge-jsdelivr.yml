@@ -1,0 +1,67 @@
+name: Purge jsDelivr cache
+
+on:
+  push:
+    branches: [ main, master ]
+    tags: [ "*" ]  # optional: also purge when you publish tags/releases
+  workflow_dispatch: {}
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Compute changed files
+        id: diff
+        run: |
+          set -e
+          BEFORE_SHA="${{ github.event.before }}"
+          AFTER_SHA="${{ github.sha }}"
+          if [ -z "$BEFORE_SHA" ]; then
+            # first push or manual run: just scan repo
+            CHANGED=$(git ls-files | tr '\n' ' ')
+          else
+            CHANGED=$(git diff --name-only "$BEFORE_SHA" "$AFTER_SHA" | tr '\n' ' ')
+          fi
+          echo "changed=$CHANGED" >> $GITHUB_OUTPUT
+
+      - name: Filter to .css / .js in packages/
+        id: files
+        run: |
+          set -e
+          LIST="${{ steps.diff.outputs.changed }}"
+          OUT=""
+          for f in $LIST; do
+            case "$f" in
+              packages/*.css|packages/*.js)
+                OUT="$OUT $f"
+                ;;
+            esac
+          done
+          echo "files=$OUT" >> $GITHUB_OUTPUT
+
+      - name: Purge jsDelivr for each changed file (latest + tag)
+        if: ${{ steps.files.outputs.files != '' }}
+        env:
+          USER: YOUR_USER
+          REPO: YOUR_REPO
+        run: |
+          set -e
+          # If this push is a tag (refs/tags/v1.2.3), extract it
+          REF="${GITHUB_REF##*/}"   # branch or tag name
+          IS_TAG="${{ startsWith(github.ref, 'refs/tags/') && 'yes' || 'no' }}"
+          for f in ${{ steps.files.outputs.files }}; do
+            echo "Purging $f"
+            # Purge the @latest URL so Webflow tags pick it up immediately
+            curl -fsS "https://purge.jsdelivr.net/gh/$USER/$REPO@latest/$f" || true
+            # If this was a tag push, also purge the versioned path (nice to have)
+            if [ "$IS_TAG" = "yes" ]; then
+              curl -fsS "https://purge.jsdelivr.net/gh/$USER/$REPO@$REF/$f" || true
+            fi
+          done
+          echo "Purge requests sent."
