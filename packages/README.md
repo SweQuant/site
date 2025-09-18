@@ -2,7 +2,7 @@
 
 Each file in this folder is a self-contained module that mirrors a section of the provided stylesheet. Reference only the modules you need inside Webflow so that edits stay isolated.
 
-If you prefer to load a single stylesheet, use `bundle.css`. It imports every module in this directory and is compatible with the Webflow head snippet below that fetches `packages/bundle.css` through jsDelivr.
+If you prefer to load a single stylesheet, use `bundle.css`. It contains every module in this directory and is compatible with the Webflow head snippet below that fetches `packages/bundle.css` through jsDelivr.
 
 - `vars-anchor.css` – Global CSS variables for the navigation component and anchor offset behavior.
 - `cad-grid.css` – CAD grid background helper classes and layering rules.
@@ -32,47 +32,38 @@ Add one `<link>` tag per module inside **Project Settings → Custom Code → He
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/USERNAME/REPO@TAG/packages/bundle.css" />
 ```
 
-### Recommended Webflow head snippet
+### Maintaining the bundle build stamp
 
-Paste this into **Project Settings → Custom Code → Head** to automatically load the newest bundle while keeping a flash-free fallback. Update the `lastKnown` stamp with the most recently published value from `version.txt`.
+Run the bundler script whenever you merge CSS changes. It inlines every module into `packages/bundle.css` so you can either serve it from jsDelivr **or** copy/paste the full stylesheet into Webflow while iterating.
 
-```html
-<!-- Always-load-latest bundle.css from GitHub via jsDelivr -->
-<script>
-(function () {
-  var base = "https://cdn.jsdelivr.net/gh/SweQuant/site@main/packages/bundle.css";
-  var vUrl = "https://cdn.jsdelivr.net/gh/SweQuant/site@main/version.txt";
+```bash
+# Generate a new build stamp automatically (001 + YYYYMMDDHHMM in CET/CEST)
+node scripts/build-bundle.js auto
 
-  // OPTIONAL: set your last-known good stamp to avoid any flash
-  var lastKnown = "001202409271400"; // update alongside version.txt; Actions will replace it after publish
-
-  // Preload with last-known (so there is no FOUC)
-  var preload = document.createElement('link');
-  preload.rel = 'stylesheet';
-  preload.href = base + "?v=" + encodeURIComponent(lastKnown);
-  document.head.appendChild(preload);
-
-  // Swap to truly-latest as soon as version.txt is fetched
-  fetch(vUrl, { cache: 'no-store' })
-    .then(function (r) { return r.text(); })
-    .then(function (v) {
-      v = (v || "").trim();
-      if (!v || v === lastKnown) return; // already fine
-      preload.href = base + "?v=" + encodeURIComponent(v);
-    })
-    .catch(function () {
-      // leave the lastKnown link in place
-    });
-})();
-</script>
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/SweQuant/site@main/packages/bundle.css?v=noscript" />
+# …or provide an explicit stamp if you prefer to control it manually
+node scripts/build-bundle.js 001202510231145
 ```
 
-### Tracking the deployed version
+The script updates both the header comment and the `--sq-build` custom property so the live bundle always advertises the exact build you just generated. By default it uses SweQuant’s local time zone (CET/CEST) and prefixes the stamp with `001`, but you can override the prefix by exporting `SQ_BUILD_PREFIX=XYZ` before running the command.
 
-`version.txt` uses a sortable numeric stamp prefixed with `001` (e.g. `001YYYYMMDDHHMM`). Whenever you update any CSS module or the bundle, bump this value and update the `lastKnown` constant above so Webflow preloads the same build you just deployed.
+To rebuild the bundle automatically after every `git merge`, link the helper hook that ships with the repository:
 
-On the published Webflow site, open the page source (or Network tab) and inspect any `cdn.jsdelivr.net` stylesheet URL. The trailing `?v=` query parameter shows which version is currently live, making it easy to confirm that Webflow is serving the latest bundle.
+```bash
+chmod +x scripts/git-hooks/post-merge
+ln -sf ../../scripts/git-hooks/post-merge .git/hooks/post-merge
+```
+
+The hook simply calls `node scripts/build-bundle.js auto`, so every merge updates `packages/bundle.css` with a fresh stamp ready for publishing.
+
+### Recommended Webflow head snippet
+
+If you rely on jsDelivr, keep a single `<link>` tag in **Project Settings → Custom Code → Head** and update the query string with the same timestamp you used when running the bundler script.
+
+```html
+<!-- Load the stamped bundle.css from jsDelivr -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/SweQuant/site@main/packages/bundle.css?v=202509181456" />
+```
+
+After publishing, open the live site in a private window and verify that the network request for `bundle.css` uses the timestamped `?v=` value you expect. If you prefer to bypass the CDN entirely while prototyping, copy the contents of `packages/bundle.css` directly into Webflow’s custom code area.
 
 Replace `USERNAME`, `REPO`, and `TAG` with your GitHub username, repository name, and release tag or branch (e.g. `@main`). Clear the Webflow published site cache after updating a file so jsDelivr serves the latest version immediately.
