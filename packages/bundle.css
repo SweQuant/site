@@ -1,3 +1,4 @@
+codex/update-build-identifiers-and-version-7gsy3f
 /*! SweQuant bundle.css | build: 001202509181704 */
 
 /* build stamp */
@@ -224,4 +225,17 @@ button:is(:hover, :focus-visible, :active){ color:var(--text-hover,#FFD160); }
   a.btn, button, a[role="button"]{ --wave-duration:0.01ms; }
   a.btn::after, button::after, a[role="button"]::after{ opacity:0; }
 }
+=======
+/*! SweQuant bundle.css | build: 2025-09-18-1427 */
+
+@import "./vars-anchor.css";
+@import "./nav.css";
+@import "./cad-grid.css";
+@import "./bg-nonlinear.css";
+@import "./reveal.css";
+@import "./wipe-heading.css";
+@import "./button-eclipse.css";
+
+/* build stamp */
+:root { --sq-build: "2025-09-18-1427"; }
 
