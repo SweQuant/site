@@ -10,7 +10,7 @@ Use the following markup in **Project Settings → Custom Code → Head** to alw
   var vUrl = "https://cdn.jsdelivr.net/gh/SweQuant/site@main/version.txt";
 
   // OPTIONAL: set your last-known good stamp to avoid any flash
-  var lastKnown = "202509181241"; // update once now; Action will supersede it
+  var lastKnown = "202509181305"; // update once now; Action will supersede it
 
   // Preload with last-known (so there is no FOUC)
   var preload = document.createElement('link');
