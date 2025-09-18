@@ -6,6 +6,7 @@ If you prefer to load a single stylesheet, use `bundle.css`. It contains every m
 
 - `vars-anchor.css` – Global CSS variables for the navigation component and anchor offset behavior.
 - `cad-grid.css` – CAD grid background helper classes and layering rules.
+- `cad-grid.js` – Interactive CAD grid animation controller for `.section-cadgrid` blocks.
 - `reveal.css` – Scroll reveal animation utilities and reduced motion fallback.
 - `wipe-heading.css` – Word-by-word wipe animation for headings.
 - `nav.css` – Navigation pill layout, link styling, responsive tweaks, and JS-fallback states.
@@ -31,6 +32,16 @@ Add one `<link>` tag per module inside **Project Settings → Custom Code → He
 <!-- Or load everything at once -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/USERNAME/REPO@TAG/packages/bundle.css" />
 ```
+
+### CAD grid animation script
+
+To enable the animated CAD background, load the standalone script and make sure the target wrapper carries the `.section-cadgrid` class (it works on any block-level element, not just `<section>` tags).
+
+```html
+<script defer src="https://cdn.jsdelivr.net/gh/USERNAME/REPO@TAG/packages/cad-grid.js"></script>
+```
+
+The script auto-initialises on `DOMContentLoaded`, so no inline bootstrapping code is required.
 
 ### Maintaining the bundle build stamp
 
