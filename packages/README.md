@@ -44,7 +44,7 @@ Paste this into **Project Settings → Custom Code → Head** to automatically l
   var vUrl = "https://cdn.jsdelivr.net/gh/SweQuant/site@main/version.txt";
 
   // OPTIONAL: set your last-known good stamp to avoid any flash
-  var lastKnown = "001202409271400"; // update alongside version.txt; Actions will replace it after publish
+  var lastKnown = "001202509181430"; // update alongside version.txt; Actions will replace it after publish
 
   // Preload with last-known (so there is no FOUC)
   var preload = document.createElement('link');
@@ -71,8 +71,14 @@ Paste this into **Project Settings → Custom Code → Head** to automatically l
 
 ### Tracking the deployed version
 
-`version.txt` uses a sortable numeric stamp prefixed with `001` (e.g. `001YYYYMMDDHHMM`). Whenever you update any CSS module or the bundle, bump this value and update the `lastKnown` constant above so Webflow preloads the same build you just deployed.
+`version.txt` uses a sortable numeric stamp prefixed with `001` (e.g. `001YYYYMMDDHHMM`). Use the SweQuant local time (CET/CEST) when creating the timestamp so the number you write into `bundle.css`, `version.txt`, and the head snippet all align with what you expect to publish. Whenever you update any CSS module or the bundle, bump this value and update the `lastKnown` constant above so Webflow preloads the same build you just deployed.
 
-On the published Webflow site, open the page source (or Network tab) and inspect any `cdn.jsdelivr.net` stylesheet URL. The trailing `?v=` query parameter shows which version is currently live, making it easy to confirm that Webflow is serving the latest bundle.
+To confirm which build Webflow is serving after you republish:
+
+1. Open the published site in a private/incognito window to avoid cached assets.
+2. In DevTools → Network (or the page source), look for the `cdn.jsdelivr.net` request that loads `packages/bundle.css`.
+3. Read the trailing `?v=` query parameter on that URL — it will match the value stored in `version.txt` for the currently live build.
+
+If the query parameter still shows an older value, clear Webflow's CDN cache and republish so the new bundle is served.
 
 Replace `USERNAME`, `REPO`, and `TAG` with your GitHub username, repository name, and release tag or branch (e.g. `@main`). Clear the Webflow published site cache after updating a file so jsDelivr serves the latest version immediately.
