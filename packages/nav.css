@@ -76,5 +76,5 @@
 /* Safety: ensure nav shows even if JS fails */
 .nav-glass{ opacity:1; transform:none; }
 .nav-items{ opacity:1; transform:none; filter:none; }
-[data-nav-expand] .nav-glass{ opacity:0; transform:scaleX(.96); }
-[data-nav-expand] .nav-items{ opacity:0; transform:translateY(4px); filter:blur(1px); }
+[data-nav-expand].is-animating .nav-glass{ opacity:0; transform:scaleX(.96); }
+[data-nav-expand].is-animating .nav-items{ opacity:0; transform:translateY(4px); filter:blur(1px); }
