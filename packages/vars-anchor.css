@@ -1,0 +1,8 @@
+/* Vars & anchor offset */
+:root{
+  --nav-top: 28px;
+  --nav-h:   68px;
+  --nav-gap: 16px;
+  --logo-h:  48px;
+}
+html { scroll-padding-top: calc(var(--nav-top) + var(--nav-h) + 8px); }
