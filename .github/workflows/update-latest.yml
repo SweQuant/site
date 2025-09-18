@@ -1,0 +1,64 @@
+name: Release (move `latest` + purge CDN)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "packages/**/*.css"
+      - ".github/workflows/release-latest.yml"
+
+permissions:
+  contents: write   # needed to move the tag and create a release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # we need full history to move tags correctly
+
+      - name: Configure Git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Move lightweight tag `latest` to this commit
+        run: |
+          # create or update the tag locally
+          git tag -f latest
+          # push (force) the tag to origin
+          git push -f origin latest
+
+      - name: Create/Update GitHub Release for `latest` (optional)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: "Latest CSS build"
+          body: "Auto-release from ${{ github.sha }} on ${{ github.ref_name }}"
+          draft: false
+          prerelease: true
+
+      - name: Collect changed CSS files under packages/
+        id: diff
+        run: |
+          BEFORE="${{ github.event.before }}"
+          AFTER="${{ github.sha }}"
+          # list changed CSS files in packages/ between previous and current push
+          CHANGED=$(git diff --name-only "$BEFORE" "$AFTER" | grep -E '^packages/.*\.css$' || true)
+          echo "changed<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Purge jsDelivr cache for changed files
+        if: steps.diff.outputs.changed != ''
+        run: |
+          echo "Purging jsDelivr cache for:"
+          echo "${{ steps.diff.outputs.changed }}"
+
+          while IFS= read -r FILE; do
+            URL="https://purge.jsdelivr.net/gh/SweQuant/site@latest/${FILE}"
+            echo "→ $URL"
+            curl -s -X GET "$URL" || true
+          done <<< "${{ steps.diff.outputs.changed }}"
