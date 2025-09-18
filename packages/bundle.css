@@ -1,4 +1,4 @@
-/*! SweQuant bundle.css | build: 2025-09-18-1248 */
+/*! SweQuant bundle.css | build: 2025-09-18-1350 */
 
 @import "./vars-anchor.css";
 @import "./nav.css";
@@ -9,4 +9,4 @@
 @import "./button-eclipse.css";
 
 /* build stamp */
-:root { --sq-build: "2025-09-18-1248"; }
+:root { --sq-build: "2025-09-18-1350"; }
