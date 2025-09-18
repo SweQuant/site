@@ -1,8 +1,7 @@
-codex/update-build-identifiers-and-version-7gsy3f
-/*! SweQuant bundle.css | build: 2025-09-18-1526 */
+/*! SweQuant bundle.css | build: 001202509181841 */
 
 /* build stamp */
-:root { --sq-build: "2025-09-18-1526"; }
+:root { --sq-build: "001202509181841"; }
 
 /* === vars-anchor.css === */
 /* Vars & anchor offset */
@@ -93,8 +92,8 @@ html { scroll-padding-top: calc(var(--nav-top) + var(--nav-h) + 8px); }
 /* Safety: ensure nav shows even if JS fails */
 .nav-glass{ opacity:1; transform:none; }
 .nav-items{ opacity:1; transform:none; filter:none; }
-[data-nav-expand] .nav-glass{ opacity:0; transform:scaleX(.96); }
-[data-nav-expand] .nav-items{ opacity:0; transform:translateY(4px); filter:blur(1px); }
+[data-nav-expand].is-animating .nav-glass{ opacity:0; transform:scaleX(.96); }
+[data-nav-expand].is-animating .nav-items{ opacity:0; transform:translateY(4px); filter:blur(1px); }
 
 /* === cad-grid.css === */
 /* CAD grid host stays behind content */
@@ -222,17 +221,4 @@ button:is(:hover, :focus-visible, :active){ color:var(--text-hover,#FFD160); }
   a.btn, button, a[role="button"]{ --wave-duration:0.01ms; }
   a.btn::after, button::after, a[role="button"]::after{ opacity:0; }
 }
-=======
-/*! SweQuant bundle.css | build: 2025-09-18-1427 */
-
-@import "./vars-anchor.css";
-@import "./nav.css";
-@import "./cad-grid.css";
-@import "./bg-nonlinear.css";
-@import "./reveal.css";
-@import "./wipe-heading.css";
-@import "./button-eclipse.css";
-
-/* build stamp */
-:root { --sq-build: "2025-09-18-1427"; }
 
