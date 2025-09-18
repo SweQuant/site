@@ -16,12 +16,12 @@ a.btn:hover::after, button:hover::after, a[role="button"]:hover::after{
   opacity:1; filter:contrast(105%) saturate(102%);
 }
 a.btn:focus-visible::after, button:focus-visible::after, a[role="button"]:focus-visible::after{
-  animation:spot-press 720ms cubic-bezier(.22,.61,.28,.99) forwards;
-  opacity:1; filter:contrast(108%) saturate(104%);
+  animation:spot-press-condensed 620ms cubic-bezier(.22,.61,.28,.99) forwards;
+  opacity:1; filter:contrast(110%) saturate(106%);
 }
 a.btn:active::after, button:active::after, a[role="button"]:active::after{
-  animation:spot-press 420ms cubic-bezier(.33,.7,.45,1) forwards;
-  opacity:1; filter:contrast(114%) saturate(110%);
+  animation:spot-press-condensed 360ms cubic-bezier(.33,.7,.45,1) forwards;
+  opacity:1; filter:contrast(116%) saturate(112%);
 }
 @keyframes spot-sweep{
   0% { --spot-x:-300px; }
@@ -29,10 +29,10 @@ a.btn:active::after, button:active::after, a[role="button"]:active::after{
   70%{ --spot-x:74%; }
   100%{ --spot-x:calc(100% + 300px); }
 }
-@keyframes spot-press{
-  0% { --spot-x:-120px; }
-  48%{ --spot-x:42%; }
-  100%{ --spot-x:calc(100% + 160px); }
+@keyframes spot-press-condensed{
+  0% { --spot-x:-140px; }
+  52%{ --spot-x:44%; }
+  100%{ --spot-x:calc(100% + 170px); }
 }
 a.btn:hover, a[role="button"]:hover{ color:var(--text-hover,#fff); }
 button:hover{ color:var(--text-hover,#FFD160); }
