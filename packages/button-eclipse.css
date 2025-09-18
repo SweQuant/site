@@ -15,11 +15,24 @@ a.btn:hover::after, button:hover::after, a[role="button"]:hover::after{
   animation:spot-sweep 1200ms cubic-bezier(.22,.61,.28,.99) forwards;
   opacity:1; filter:contrast(105%) saturate(102%);
 }
+a.btn:focus-visible::after, button:focus-visible::after, a[role="button"]:focus-visible::after{
+  animation:spot-press 720ms cubic-bezier(.22,.61,.28,.99) forwards;
+  opacity:1; filter:contrast(108%) saturate(104%);
+}
+a.btn:active::after, button:active::after, a[role="button"]:active::after{
+  animation:spot-press 420ms cubic-bezier(.33,.7,.45,1) forwards;
+  opacity:1; filter:contrast(114%) saturate(110%);
+}
 @keyframes spot-sweep{
   0% { --spot-x:-300px; }
   35%{ --spot-x:28%; }
   70%{ --spot-x:74%; }
   100%{ --spot-x:calc(100% + 300px); }
+}
+@keyframes spot-press{
+  0% { --spot-x:-120px; }
+  48%{ --spot-x:42%; }
+  100%{ --spot-x:calc(100% + 160px); }
 }
 a.btn:hover, a[role="button"]:hover{ color:var(--text-hover,#fff); }
 button:hover{ color:var(--text-hover,#FFD160); }
