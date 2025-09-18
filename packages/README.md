@@ -37,10 +37,23 @@ Add one `<link>` tag per module inside **Project Settings → Custom Code → He
 Run the bundler script whenever you merge CSS changes. It inlines every module into `packages/bundle.css` so you can either serve it from jsDelivr **or** copy/paste the full stylesheet into Webflow while iterating.
 
 ```bash
-node scripts/build-bundle.js YYYYMMDDHHMM
+# Generate a new build stamp automatically (001 + YYYYMMDDHHMM in CET/CEST)
+node scripts/build-bundle.js auto
+
+# …or provide an explicit stamp if you prefer to control it manually
+node scripts/build-bundle.js 001202510231145
 ```
 
-Use SweQuant’s local time (CET/CEST) for the timestamp. The script updates both the header comment and the `--sq-build` custom property so the live bundle always advertises the exact build you just generated.
+The script updates both the header comment and the `--sq-build` custom property so the live bundle always advertises the exact build you just generated. By default it uses SweQuant’s local time zone (CET/CEST) and prefixes the stamp with `001`, but you can override the prefix by exporting `SQ_BUILD_PREFIX=XYZ` before running the command.
+
+To rebuild the bundle automatically after every `git merge`, link the helper hook that ships with the repository:
+
+```bash
+chmod +x scripts/git-hooks/post-merge
+ln -sf ../../scripts/git-hooks/post-merge .git/hooks/post-merge
+```
+
+The hook simply calls `node scripts/build-bundle.js auto`, so every merge updates `packages/bundle.css` with a fresh stamp ready for publishing.
 
 ### Recommended Webflow head snippet
 

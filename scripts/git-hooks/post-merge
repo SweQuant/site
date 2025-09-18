@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+#
+# Git post-merge hook to rebuild the bundled stylesheet automatically.
+
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+
+node "$REPO_ROOT/scripts/build-bundle.js" auto
+
+if ! git -C "$REPO_ROOT" diff --quiet packages/bundle.css; then
+  echo "Updated packages/bundle.css with a fresh build stamp." >&2
+fi

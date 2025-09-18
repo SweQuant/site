@@ -12,19 +12,55 @@ const modules = [
   'button-eclipse.css'
 ];
 
+const STOCKHOLM_TZ = 'Europe/Stockholm';
+
+function formatNowStamp(prefix = '001') {
+  const formatter = new Intl.DateTimeFormat('en-GB', {
+    timeZone: STOCKHOLM_TZ,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  });
+
+  const parts = formatter.formatToParts(new Date());
+  const lookup = Object.fromEntries(parts.map((p) => [p.type, p.value]));
+  const stamp = `${lookup.year}${lookup.month}${lookup.day}${lookup.hour}${lookup.minute}`;
+  return `${prefix || ''}${stamp}`;
+}
+
+function validateStamp(stamp) {
+  if (typeof stamp !== 'string') {
+    return false;
+  }
+
+  if (/^\d{12}$/.test(stamp)) {
+    return true;
+  }
+
+  if (/^\d{3}\d{12}$/.test(stamp)) {
+    return true;
+  }
+
+  return false;
+}
+
 async function main() {
-  const stamp = process.argv[2];
+  let stampArg = process.argv[2];
 
-  if (!stamp) {
-    console.error('Usage: node scripts/build-bundle.js <YYYYMMDDHHMM>');
+  if (!stampArg || stampArg === 'auto') {
+    const prefix = process.env.SQ_BUILD_PREFIX || '001';
+    stampArg = formatNowStamp(prefix);
+  }
+
+  if (!validateStamp(stampArg)) {
+    console.error('Build stamp must be 12 digits (YYYYMMDDHHMM) optionally prefixed with three digits.');
     process.exit(1);
   }
 
-  if (!/^\d{12}$/.test(stamp)) {
-    console.error('Build stamp must match YYYYMMDDHHMM.');
-    process.exit(1);
-  }
-
+  const stamp = stampArg;
   const bundleHeader = `/*! SweQuant bundle.css | build: ${stamp} */`;
   const buildToken = `:root { --sq-build: "${stamp}"; }`;
 
