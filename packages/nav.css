@@ -1,0 +1,77 @@
+/* NAV: overlay (absolute), pill clickable */
+.section-nav{ position:relative; z-index:3; }
+.nav-shell{
+  position:absolute !important; top:var(--nav-top,28px); left:0; right:0;
+  display:flex; justify-content:center;
+  pointer-events:none !important; z-index:2147483600 !important;
+}
+.nav-row{ width:min(1180px,92vw); padding:0 6px; }
+.nav-glass{
+  pointer-events:auto !important; position:relative; z-index:2147483601 !important;
+  width:100% !important; height:var(--nav-h,68px) !important;
+  display:flex !important; align-items:center !important; justify-content:space-between !important;
+  overflow:hidden; padding:0 16px !important; border-radius:18px !important;
+  background:
+    radial-gradient(120% 220% at 50% 50%,
+      rgba(255,255,255,.10) 0%,
+      rgba(255,255,255,.08) 55%,
+      rgba(255,255,255,.06) 80%,
+      rgba(255,255,255,0) 100%) !important;
+  border:1px solid rgba(255,255,255,.22) !important;
+  -webkit-backdrop-filter: blur(1.1px) saturate(160%) !important;
+  backdrop-filter: blur(1.1px) saturate(160%) !important;
+  box-shadow:none !important;
+  transform:scaleX(.96); opacity:0;
+}
+.nav-items{ display:flex; align-items:center; gap:12px; width:100%; opacity:0; transform:translateY(4px); filter:blur(1px); }
+.nav-logo{ display:flex; align-items:center; }
+.nav-logo img{ display:block; height:var(--logo-h,48px); width:auto; max-height:none; }
+
+/* Center the links perfectly in the pill */
+.nav-links{
+  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  display:flex; align-items:center; gap:28px;
+}
+
+/* Clean, neutral nav link styling (fixes "blue link" look) */
+.nav-links a{
+  all:unset;
+  cursor:pointer;
+  font: 500 16px/1.2 Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+  color:rgba(255,255,255,.88);
+  position:relative; padding:4px 0;
+  transition: color .25s ease, transform .12s ease;
+}
+.nav-links a::after{
+  content:""; position:absolute; left:0; bottom:-6px; height:2px; width:100%;
+  background: currentColor; transform:scaleX(0); transform-origin:left;
+  transition: transform .35s cubic-bezier(.25,.55,.25,1);
+}
+.nav-links a:hover{ color:#fff; }
+.nav-links a:hover::after{ transform:scaleX(1); }
+.nav-links a:active{ transform:scale(.96); }
+.nav-links a.active{ color:#0047FF; font-weight:600; }
+.nav-links a.active::after{ transform:scaleX(1); }
+
+/* entrance */
+[data-nav-expand].in .nav-glass{ animation:nav-fade-in var(--dur,420ms) cubic-bezier(.25,.55,.25,1) forwards; animation-delay:var(--delay,140ms); }
+[data-nav-expand].in .nav-items{ animation:nav-items-in 420ms cubic-bezier(.25,.55,.25,1) forwards; animation-delay:calc(var(--delay,140ms) + 120ms); }
+[data-nav-expand].in .nav-logo img{ animation:nav-logo-in 420ms cubic-bezier(.25,.55,.25,1) forwards; animation-delay:calc(var(--delay,140ms) + 120ms); }
+@keyframes nav-fade-in{ from{opacity:0;transform:scaleX(.96)} to{opacity:1;transform:scaleX(1)} }
+@keyframes nav-items-in{ from{opacity:0;transform:translateY(4px);filter:blur(1px)} to{opacity:1;transform:translateY(0);filter:blur(0)} }
+@keyframes nav-logo-in{  from{opacity:0;transform:translateY(2px)} to{opacity:1;transform:translateY(0)} }
+
+/* Space under pill */
+.with-nav-offset{ padding-top: calc(var(--nav-top,28px) + var(--nav-h,68px) + var(--nav-gap,16px)); }
+
+/* Mobile */
+@media (max-width:768px){
+  :root{ --nav-h:56px; --logo-h:36px; --nav-top:8px; }
+  .nav-links{ display:none; }
+}
+
+/* Safety: ensure nav shows even if JS fails */
+.nav-glass{ opacity:1; transform:none; }
+.nav-items{ opacity:1; transform:none; filter:none; }
+[data-nav-expand] .nav-glass{ opacity:0; transform:scaleX(.96); }
+[data-nav-expand] .nav-items{ opacity:0; transform:translateY(4px); filter:blur(1px); }

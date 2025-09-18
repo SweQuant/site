@@ -1,0 +1,15 @@
+/* Soft grey background (nonlinear) */
+.bg-nonlinear{ position:relative; isolation:isolate; }
+.bg-nonlinear::after{
+  content:""; position:fixed; inset:-20vh -20vw; pointer-events:none; z-index:-1;
+  background:
+    radial-gradient(70rem 50rem at 20% 30%, rgba(255,255,255,.16), transparent 65%),
+    radial-gradient(60rem 45rem at 80% 25%, rgba(235,235,235,.12), transparent 65%),
+    radial-gradient(70rem 50rem at 75% 75%, rgba(210,210,210,.10), transparent 68%),
+    radial-gradient(90rem 70rem at 50% 90%, rgba(190,190,190,.08), transparent 70%);
+  animation:drift 50s ease-in-out infinite alternate; will-change:background-position;
+}
+@keyframes drift{
+  0%{ background-position:0 0,0 0,0 0,0 0; }
+  100%{ background-position:20px -15px,-15px 10px,18px 18px,-12px 12px; }
+}
