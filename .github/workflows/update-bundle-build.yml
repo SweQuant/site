@@ -1,0 +1,79 @@
+name: Update bundle build stamp
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  update-bundle:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate UTC build stamp
+        id: stamp
+        run: |
+          echo "display=$(date -u '+%Y-%m-%d-%H%M')" >> "$GITHUB_OUTPUT"
+          echo "compact=$(date -u '+%Y%m%d%H%M')" >> "$GITHUB_OUTPUT"
+
+      - name: Update bundle.css with build stamp
+        env:
+          STAMP_DISPLAY: ${{ steps.stamp.outputs.display }}
+          STAMP_COMPACT: ${{ steps.stamp.outputs.compact }}
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          import re
+          import os
+
+          stamp_display = os.environ['STAMP_DISPLAY']
+          stamp_compact = os.environ['STAMP_COMPACT']
+          path = Path('packages/bundle.css')
+          text = path.read_text()
+
+          comment_pattern = re.compile(r'/\*!\s*SweQuant bundle\.css.*?\*/', re.S)
+          if comment_pattern.search(text):
+              text = comment_pattern.sub(f'/*! SweQuant bundle.css | build: {stamp_display} */', text, count=1)
+          else:
+              text = f'/*! SweQuant bundle.css | build: {stamp_display} */\n\n' + text.lstrip()
+
+          if re.search(r':root\s*\{\s*--sq-build:', text):
+              text = re.sub(r':root\s*\{\s*--sq-build:\s*"[^"]*"\s*;\s*\}', f':root {{ --sq-build: "{stamp_display}"; }}', text, count=1)
+          else:
+              text = text.rstrip() + f"\n\n/* build stamp */\n:root {{ --sq-build: \"{stamp_display}\"; }}\n"
+
+          path.write_text(text)
+
+          Path('version.txt').write_text(stamp_compact + '\n')
+          PY
+
+      - name: Commit changes
+        env:
+          STAMP_DISPLAY: ${{ steps.stamp.outputs.display }}
+        run: |
+          if git diff --quiet -- packages/bundle.css version.txt; then
+            echo "bundle.css is already up to date"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add packages/bundle.css version.txt
+          git commit -m "chore: update bundle build stamp ${STAMP_DISPLAY}"
+          git push
+
+      - name: Purge jsDelivr cache
+        run: |
+          curl -sS "https://purge.jsdelivr.net/gh/SweQuant/site@main/packages/bundle.css" || true
+          curl -sS "https://purge.jsdelivr.net/gh/SweQuant/site@main/version.txt" || true
+
+      - name: Publish build stamp
+        run: |
+          echo "### Latest bundle build" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Display timestamp: ${{ steps.stamp.outputs.display }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Cache-busting token: ${{ steps.stamp.outputs.compact }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- CDN URL: https://cdn.jsdelivr.net/gh/SweQuant/site@main/packages/bundle.css?v=${{ steps.stamp.outputs.compact }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Version manifest: https://cdn.jsdelivr.net/gh/SweQuant/site@main/version.txt" >> "$GITHUB_STEP_SUMMARY"
