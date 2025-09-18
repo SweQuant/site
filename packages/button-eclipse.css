@@ -35,7 +35,9 @@ a.btn::after, button::after, a[role="button"]::after{
   width:160%;
   aspect-ratio:1;
   z-index:1;
-  transform:translate(-50%, -50%);
+  transform:
+    translate(-50%, -50%)
+    scale(calc(.65 + var(--wave-progress) * .35));
   border-radius:50%;
   background:
     radial-gradient(circle at center, rgba(255,255,255,.26) 0 35%, rgba(255,255,255,0) 65%),
@@ -48,11 +50,25 @@ a.btn::after, button::after, a[role="button"]::after{
 
 a.btn > *, button > *, a[role="button"] > *{ position:relative; z-index:2; }
 
+a.btn:focus-visible, button:focus-visible, a[role="button"]:focus-visible{
+  --wave-progress:.86;
+}
+
 a.btn:hover, button:hover, a[role="button"]:hover{
   --wave-progress:1;
 }
-a.btn:hover, a[role="button"]:hover{ color:var(--text-hover,#fff); }
-button:hover{ color:var(--text-hover,#FFD160); }
+
+a.btn:active, button:active, a[role="button"]:active{
+  --wave-progress:.72;
+}
+
+a.btn:focus-visible:active, button:focus-visible:active, a[role="button"]:focus-visible:active{
+  --wave-progress:.64;
+}
+
+a.btn:is(:hover, :focus-visible, :active),
+a[role="button"]:is(:hover, :focus-visible, :active){ color:var(--text-hover,#fff); }
+button:is(:hover, :focus-visible, :active){ color:var(--text-hover,#FFD160); }
 
 @media (prefers-reduced-motion: reduce){
   a.btn, button, a[role="button"]{ --wave-duration:0.01ms; }
