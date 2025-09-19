@@ -10,6 +10,7 @@ If you prefer to load a single stylesheet, use `bundle.css`. It contains every m
 - `reveal.css` – Scroll reveal animation utilities and reduced motion fallback.
 - `wipe-heading.css` – Word-by-word wipe animation for headings.
 - `nav.css` – Navigation pill layout, link styling, responsive tweaks, and JS-fallback states.
+- `glass-surface.css` – Reusable frosted glass background, blur, and border utility.
 - `bg-nonlinear.css` – Fixed soft grey background with animated drift.
 - `button-eclipse.css` – Eclipse hover effect for buttons and anchor buttons.
 
@@ -65,6 +66,10 @@ ln -sf ../../scripts/git-hooks/post-merge .git/hooks/post-merge
 ```
 
 The hook simply calls `node scripts/build-bundle.js auto`, so every merge updates `packages/bundle.css` with a fresh stamp ready for publishing.
+
+### Adding new CSS modules
+
+When you introduce a fresh chunk of CSS, drop it in its own file inside this directory and add the filename to the `modules` array in `scripts/build-bundle.js`. Regenerate `bundle.css` with the build script afterwards so the bundle stays in sync with the standalone modules.
 
 ### Recommended Webflow head snippet
 

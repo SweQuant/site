@@ -1,7 +1,7 @@
-/*! SweQuant bundle.css | build: 2025-09-18-1704 */
+/*! SweQuant bundle.css | build: 001202509190909 */
 
 /* build stamp */
-:root { --sq-build: "2025-09-18-1704"; }
+:root { --sq-build: "001202509190909"; }
 
 /* === vars-anchor.css === */
 /* Vars & anchor offset */
@@ -94,6 +94,21 @@ html { scroll-padding-top: calc(var(--nav-top) + var(--nav-h) + 8px); }
 .nav-items{ opacity:1; transform:none; filter:none; }
 [data-nav-expand].is-animating .nav-glass{ opacity:0; transform:scaleX(.96); }
 [data-nav-expand].is-animating .nav-items{ opacity:0; transform:translateY(4px); filter:blur(1px); }
+
+/* === glass-surface.css === */
+/* Glass surface utility */
+.glass-surface{
+  background:
+    radial-gradient(120% 220% at 50% 50%,
+      rgba(255,255,255,.24) 0%,
+      rgba(255,255,255,.20) 55%,
+      rgba(255,255,255,.16) 80%,
+      rgba(255,255,255,.08) 100%) !important;
+  border:1px solid rgba(255,255,255,.32) !important;
+  backdrop-filter: blur(1.6px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(1.6px) saturate(160%) !important;
+  border-radius:18px;
+}
 
 /* === cad-grid.css === */
 /* CAD grid host stays behind content */
