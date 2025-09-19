@@ -1,5 +1,5 @@
 <script>
-/*! SweQuant footer-bundle.js | build: 001202509192329 */
+/*! SweQuant footer-bundle.js | build: 001202509200123 */
 
 // === wipe-heading.js ===
 (function(){
@@ -480,7 +480,8 @@
 
 // === cad-grid.js ===
 (function () {
-  const PREFERS_REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const MOTION_QUERY = matchMedia('(prefers-reduced-motion: reduce)');
+  let PREFERS_REDUCED = MOTION_QUERY.matches;
 
   // ===== CONFIG (elegant & stable) =====
   const CONFIG = {
@@ -640,6 +641,10 @@
     let lastT=performance.now(), boost=1;
     let cx=null,cy=null;
 
+    let rafId=null;
+    let isActive=false;
+    let isVisible=false;
+
     // intro rain
     let fallStart=[],fallDur=[],rainDone=false;
 
@@ -675,6 +680,10 @@
       fallStart=Array.from({length:rows},()=>Array.from({length:cols},()=>now+(CONFIG.rain.enabled?Math.random()*CONFIG.rain.staggerMax:0)));
       fallDur  =Array.from({length:rows},()=>Array.from({length:cols},()=>CONFIG.rain.durationMs*(0.9+Math.random()*0.25)));
       rainDone=!CONFIG.rain.enabled;
+
+      if(!isActive){
+        render();
+      }
     }
 
     function newBurst(x, y){
@@ -712,11 +721,13 @@
     }
 
     function spawn(){
+      if(PREFERS_REDUCED) return;
       if (bursts.length >= CONFIG.bursts.maxActive) return;
       const b = newBurst(Math.random()*W, Math.random()*H);
       bursts.push(b);
     }
     function spawnAt(x,y){
+      if(PREFERS_REDUCED) return;
       if (bursts.length >= CONFIG.bursts.maxActive) bursts.shift();
       const b = newBurst(x,y);
       bursts.push(b);
@@ -734,13 +745,16 @@
     }
 
     function render(ts){
-      const now=ts; const dt=Math.min(50, ts - lastT); lastT=ts;
+      const now = ts==null ? performance.now() : ts;
+      if(ts==null) ts = now;
+      const dt=Math.min(50, Math.max(0, now - lastT));
+      lastT=now;
 
       // bounded drift
       driftCycle = (driftCycle + (CONFIG.driftSpeedX*dt*boost)/CONFIG.spacing) % 1;
 
       // spawner
-      if(!PREFERS_REDUCED && now>=nextSpawnAt){
+      if(isActive && !PREFERS_REDUCED && now>=nextSpawnAt){
         if(Math.random()<CONFIG.bursts.chance){
           const n=randInt(CONFIG.bursts.countRange[0], CONFIG.bursts.countRange[1]);
           for(let i=0;i<n;i++) spawn();
@@ -922,7 +936,72 @@
       }
 
       if(!rainDone && allSettled) rainDone=true;
-      requestAnimationFrame(render);
+    }
+
+    function loop(ts){
+      rafId=null;
+      render(ts);
+      if(isActive){
+        rafId=requestAnimationFrame(loop);
+      }
+    }
+
+    function startLoop(){
+      if(PREFERS_REDUCED){
+        render();
+        return;
+      }
+      if(isActive) return;
+      isActive=true;
+      lastT=performance.now();
+      scheduleNextSpawn(lastT);
+      rafId=requestAnimationFrame(loop);
+    }
+
+    function stopLoop(){
+      if(rafId!=null){
+        cancelAnimationFrame(rafId);
+        rafId=null;
+      }
+      if(!isActive){
+        cx=null;
+        cy=null;
+        boost=1;
+        render();
+        return;
+      }
+      isActive=false;
+      cx=null;
+      cy=null;
+      boost=1;
+      render();
+    }
+
+    function renderStatic(){ render(); }
+
+    function updateVisibility(visible){
+      isVisible=visible;
+      if(PREFERS_REDUCED){
+        stopLoop();
+        return;
+      }
+      if(visible){
+        startLoop();
+      } else {
+        stopLoop();
+      }
+    }
+
+    function handleMotionPreferenceChange(prefersReduced){
+      if(prefersReduced){
+        bursts=[];
+        glyphs.clear();
+        stopLoop();
+      } else if(isVisible){
+        startLoop();
+      } else {
+        stopLoop();
+      }
     }
 
     // interactions
@@ -940,11 +1019,50 @@
     section.addEventListener('click',      onClick,  {passive:true});
 
     scheduleNextSpawn(performance.now());
-    requestAnimationFrame(ts=>{ lastT=ts; render(ts); });
+    render();
+
+    return {
+      section,
+      startLoop,
+      stopLoop,
+      renderStatic,
+      setVisibility: updateVisibility,
+      handleMotionPreferenceChange
+    };
   }
 
   document.addEventListener('DOMContentLoaded', ()=>{
-    document.querySelectorAll('.section-cadgrid').forEach(controller);
+    const controllers = new Map();
+    const supportsIO = typeof IntersectionObserver !== 'undefined';
+    const observer = supportsIO ? new IntersectionObserver(entries => {
+      for(const entry of entries){
+        const ctrl = controllers.get(entry.target);
+        if(!ctrl) continue;
+        const visible = entry.isIntersecting && entry.intersectionRatio > 0;
+        ctrl.setVisibility(visible);
+      }
+    }, { threshold: [0, 0.01] }) : null;
+
+    document.querySelectorAll('.section-cadgrid').forEach(section => {
+      const ctrl = controller(section);
+      controllers.set(section, ctrl);
+      if(observer){
+        observer.observe(section);
+      } else {
+        ctrl.setVisibility(true);
+      }
+    });
+
+    const handleMotionChange = e => {
+      PREFERS_REDUCED = e.matches;
+      controllers.forEach(ctrl => ctrl.handleMotionPreferenceChange(PREFERS_REDUCED));
+    };
+
+    if(MOTION_QUERY.addEventListener){
+      MOTION_QUERY.addEventListener('change', handleMotionChange);
+    } else if(MOTION_QUERY.addListener){
+      MOTION_QUERY.addListener(handleMotionChange);
+    }
   });
 })();
 
