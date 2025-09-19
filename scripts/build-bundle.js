@@ -78,8 +78,9 @@ async function main() {
   }
 
   const output = sections.join('\n').replace(/\n{3,}/g, '\n\n');
+  const wrappedOutput = ['<style>', output, '</style>'].join('\n');
   const bundlePath = path.join(packagesDir, 'bundle.css');
-  await fs.writeFile(bundlePath, output + '\n', 'utf8');
+  await fs.writeFile(bundlePath, wrappedOutput + '\n', 'utf8');
   console.log(`Wrote ${bundlePath} with build ${stamp}`);
 }
 
