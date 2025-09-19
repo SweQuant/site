@@ -1,5 +1,5 @@
 <script>
-/*! SweQuant footer-bundle.js | build: 001202509192316 */
+/*! SweQuant footer-bundle.js | build: 001202509192329 */
 
 // === wipe-heading.js ===
 (function(){
@@ -82,6 +82,400 @@
   } else {
     init();
   }
+})();
+
+// === reveal-controller.js ===
+(function () {
+  const PREFERS_REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const OBSERVER_MARGIN = '0px 0px -12% 0px';
+  const OBSERVER_THRESHOLD = [0, 0.15, 0.35, 0.55, 0.75, 0.95];
+  const DATA_REVEAL = 'data-reveal';
+
+  const onReady = (callback) => {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', callback, { once: true });
+    } else {
+      callback();
+    }
+  };
+
+  const parseTimeValue = (value) => {
+    if (!value && value !== 0) {
+      return null;
+    }
+
+    const str = String(value).trim();
+    if (!str) {
+      return null;
+    }
+
+    if (/ms$/i.test(str)) {
+      const amount = Number.parseFloat(str.replace(/ms$/i, ''));
+      return Number.isFinite(amount) ? amount : null;
+    }
+
+    if (/s$/i.test(str)) {
+      const amount = Number.parseFloat(str.replace(/s$/i, ''));
+      return Number.isFinite(amount) ? amount * 1000 : null;
+    }
+
+    const amount = Number.parseFloat(str);
+    return Number.isFinite(amount) ? amount : null;
+  };
+
+  const formatMs = (value) => {
+    const parsed = parseTimeValue(value);
+    return parsed == null ? null : `${parsed}ms`;
+  };
+
+  const resolveTargets = (element) => {
+    const selector = element.getAttribute('data-reveal-targets') || element.getAttribute('data-reveal-target');
+    if (selector) {
+      return Array.from(element.querySelectorAll(selector));
+    }
+
+    if (element.hasAttribute('data-wipe-words')) {
+      return Array.from(element.querySelectorAll('.wipe-word'));
+    }
+
+    return [element];
+  };
+
+  const applyStagger = (element, targets) => {
+    const baseDelay = parseTimeValue(element.getAttribute('data-reveal-delay'));
+    const step = parseTimeValue(element.getAttribute('data-reveal-step'));
+
+    const lead = formatMs(element.getAttribute('data-reveal-lead'));
+    if (lead !== null) {
+      element.style.setProperty('--lead', lead);
+    }
+
+    const stepValue = formatMs(element.getAttribute('data-reveal-step'));
+    if (stepValue !== null) {
+      element.style.setProperty('--step', stepValue);
+    }
+
+    const durationValue = formatMs(element.getAttribute('data-reveal-duration'));
+    if (durationValue !== null) {
+      element.style.setProperty('--dur', durationValue);
+    }
+
+    targets.forEach((target, index) => {
+      if (baseDelay != null || step != null) {
+        const delayMs = (baseDelay ?? 0) + (step ?? 0) * index;
+        target.style.setProperty('--d', `${delayMs}ms`);
+      }
+    });
+  };
+
+  const revealTargets = (element) => {
+    const targets = resolveTargets(element);
+    applyStagger(element, targets);
+
+    const extraSelector = element.getAttribute('data-reveal-activate');
+    if (extraSelector) {
+      document.querySelectorAll(extraSelector).forEach((node) => {
+        node.classList.add('in');
+      });
+    }
+
+    if (element.hasAttribute('data-wipe-words')) {
+      element.classList.add('in');
+    }
+
+    targets.forEach((target) => {
+      target.classList.add('in');
+    });
+  };
+
+  const init = () => {
+    const candidates = Array.from(document.querySelectorAll('.reveal, .reveal-btn, [data-wipe-words], [' + DATA_REVEAL + ']'));
+    if (!candidates.length) {
+      return;
+    }
+
+    if (PREFERS_REDUCED) {
+      candidates.forEach((element) => {
+        revealTargets(element);
+      });
+      return;
+    }
+
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting || entry.intersectionRatio > 0) {
+          const element = entry.target;
+          if (element.dataset.revealState === 'in') {
+            obs.unobserve(element);
+            return;
+          }
+
+          element.dataset.revealState = 'in';
+          revealTargets(element);
+          obs.unobserve(element);
+        }
+      });
+    }, {
+      rootMargin: OBSERVER_MARGIN,
+      threshold: OBSERVER_THRESHOLD
+    });
+
+    candidates.forEach((element) => {
+      observer.observe(element);
+    });
+  };
+
+  onReady(init);
+})();
+
+// === nav-entrance.js ===
+(function () {
+  const PREFERS_REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const NAV_SELECTOR = '[data-nav-expand]';
+
+  const onReady = (callback) => {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', callback, { once: true });
+    } else {
+      callback();
+    }
+  };
+
+  const parseTimeValue = (value) => {
+    if (!value && value !== 0) {
+      return null;
+    }
+
+    const str = String(value).trim();
+    if (!str) {
+      return null;
+    }
+
+    if (/ms$/i.test(str)) {
+      const amount = Number.parseFloat(str.replace(/ms$/i, ''));
+      return Number.isFinite(amount) ? amount : null;
+    }
+
+    if (/s$/i.test(str)) {
+      const amount = Number.parseFloat(str.replace(/s$/i, ''));
+      return Number.isFinite(amount) ? amount * 1000 : null;
+    }
+
+    const amount = Number.parseFloat(str);
+    return Number.isFinite(amount) ? amount : null;
+  };
+
+  const formatMs = (value) => {
+    const parsed = parseTimeValue(value);
+    return parsed == null ? null : `${parsed}ms`;
+  };
+
+  const activateNav = (element) => {
+    element.classList.add('in');
+    element.classList.remove('is-animating');
+  };
+
+  const init = () => {
+    const navs = Array.from(document.querySelectorAll(NAV_SELECTOR));
+    if (!navs.length) {
+      return;
+    }
+
+    navs.forEach((nav, index) => {
+      const delayAttr = nav.getAttribute('data-nav-delay');
+      const durationAttr = nav.getAttribute('data-nav-duration');
+      const introDelayAttr = nav.getAttribute('data-nav-intro-delay');
+
+      const delayValue = formatMs(delayAttr);
+      if (delayValue !== null) {
+        nav.style.setProperty('--delay', delayValue);
+      }
+
+      const durationValue = formatMs(durationAttr);
+      if (durationValue !== null) {
+        nav.style.setProperty('--dur', durationValue);
+      }
+
+      if (PREFERS_REDUCED) {
+        activateNav(nav);
+        return;
+      }
+
+      const introDelay = parseTimeValue(introDelayAttr);
+      const startDelay = Number.isFinite(introDelay) ? introDelay : 0;
+      const show = () => activateNav(nav);
+
+      if (startDelay > 0) {
+        window.setTimeout(show, startDelay);
+        return;
+      }
+
+      if (index === 0) {
+        window.requestAnimationFrame(() => {
+          window.requestAnimationFrame(show);
+        });
+      } else {
+        window.requestAnimationFrame(show);
+      }
+    });
+  };
+
+  onReady(init);
+})();
+
+// === nav-active-link.js ===
+(function () {
+  const ACTIVE_CLASS = 'active';
+  const LINK_SELECTOR = '.nav-links a[href^="#"]';
+
+  const onReady = (callback) => {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', callback, { once: true });
+    } else {
+      callback();
+    }
+  };
+
+  const parseHash = (href) => {
+    if (!href) {
+      return null;
+    }
+
+    try {
+      const url = new URL(href, window.location.href);
+      return url.hash ? decodeURIComponent(url.hash.slice(1)) : null;
+    } catch (error) {
+      if (href.startsWith('#')) {
+        return decodeURIComponent(href.slice(1));
+      }
+    }
+
+    return null;
+  };
+
+  const readPxVar = (styles, name) => {
+    const value = styles.getPropertyValue(name);
+    if (!value) {
+      return 0;
+    }
+
+    const number = Number.parseFloat(value);
+    return Number.isFinite(number) ? number : 0;
+  };
+
+  const getNavOffset = () => {
+    const styles = getComputedStyle(document.documentElement);
+    const top = readPxVar(styles, '--nav-top');
+    const height = readPxVar(styles, '--nav-h');
+    const gap = 8;
+    return top + height + gap;
+  };
+
+  const escapeSelector = (value) => {
+    if (window.CSS && typeof window.CSS.escape === 'function') {
+      return window.CSS.escape(value);
+    }
+
+    return value.replace(/([\0-\x1F\x7F-\x9F!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~ ])/g, '\\$1');
+  };
+
+  const init = () => {
+    const links = Array.from(document.querySelectorAll(LINK_SELECTOR));
+    if (!links.length) {
+      return;
+    }
+
+    const pairs = links.map((link) => {
+      const id = parseHash(link.getAttribute('href'));
+      if (!id) {
+        return null;
+      }
+
+      const target = document.getElementById(id) || document.querySelector(`[data-nav-section="${escapeSelector(id)}"]`);
+      if (!target) {
+        return null;
+      }
+
+      return { link, target };
+    }).filter(Boolean);
+
+    if (!pairs.length) {
+      return;
+    }
+
+    let activeLink = null;
+    const setActive = (next) => {
+      if (next === activeLink) {
+        return;
+      }
+
+      if (activeLink) {
+        activeLink.classList.remove(ACTIVE_CLASS);
+      }
+
+      activeLink = next;
+      if (activeLink) {
+        activeLink.classList.add(ACTIVE_CLASS);
+      }
+    };
+
+    const selectByScroll = () => {
+      const offset = getNavOffset();
+      const scrollY = window.scrollY;
+      const viewportBottom = scrollY + window.innerHeight;
+      const nearBottom = viewportBottom >= document.documentElement.scrollHeight - 2;
+      let chosen = null;
+
+      for (const { link, target } of pairs) {
+        const rect = target.getBoundingClientRect();
+        const top = rect.top + scrollY;
+        if (nearBottom) {
+          if (!chosen || top >= (chosen.target.getBoundingClientRect().top + scrollY)) {
+            chosen = { link, target };
+          }
+          continue;
+        }
+
+        if (scrollY + offset >= top) {
+          if (!chosen || top >= (chosen.target.getBoundingClientRect().top + scrollY)) {
+            chosen = { link, target };
+          }
+        }
+      }
+
+      if (!chosen) {
+        chosen = pairs[0];
+      }
+
+      setActive(chosen.link);
+    };
+
+    let ticking = false;
+    const handleScroll = () => {
+      if (ticking) {
+        return;
+      }
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        selectByScroll();
+        ticking = false;
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll);
+    window.addEventListener('load', handleScroll);
+
+    links.forEach((link) => {
+      link.addEventListener('click', () => {
+        setActive(link);
+      });
+    });
+
+    selectByScroll();
+  };
+
+  onReady(init);
 })();
 
 // === cad-grid.js ===
