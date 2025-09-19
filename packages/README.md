@@ -48,7 +48,11 @@ When you use the navigation module, add a `.no-js` class to the root element so 
 
 <!-- Or load everything at once -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/USERNAME/REPO@TAG/packages/bundle.css" />
+<script defer src="https://cdn.jsdelivr.net/gh/USERNAME/REPO@TAG/packages/wipe-heading.js"></script>
 ```
+
+`bundle.css` only ships the combined styles. Load the helper script as well—either from jsDelivr or an uploaded Webflow asset—so
+`[data-wipe-words]` headings chunk correctly and the wipe animation can run.
 
 ### CAD grid animation script
 
@@ -69,6 +73,9 @@ The chunking helper scans every `[data-wipe-words]` element, preserves the origi
 ```
 
 Include the script once per page, ideally alongside the stylesheet link in the global head snippet.
+
+If you trigger the animation with Webflow interactions, make sure the interaction toggles the `in` class on the generated `.wipe-word`
+elements so each `.wipe-chunk` animation plays.
 
 ### Maintaining the bundle build stamp
 
@@ -100,6 +107,7 @@ If you rely on jsDelivr, keep a single `<link>` tag in **Project Settings → Cu
 ```html
 <!-- Load the stamped bundle.css from jsDelivr -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/SweQuant/site@main/packages/bundle.css?v=202509181456" />
+<script defer src="https://cdn.jsdelivr.net/gh/SweQuant/site@main/packages/wipe-heading.js"></script>
 ```
 
 After publishing, open the live site in a private window and verify that the network request for `bundle.css` uses the timestamped `?v=` value you expect. If you prefer to bypass the CDN entirely while prototyping, copy the contents of `packages/bundle.css` directly into Webflow’s custom code area.
