@@ -12,6 +12,7 @@ If you prefer to load a single stylesheet, use `bundle.css`. It contains every m
 - `nav.css` – Navigation pill layout, link styling, responsive tweaks, and JS-fallback states.
 - `bg-nonlinear.css` – Fixed soft grey background with animated drift.
 - `button-eclipse.css` – Eclipse hover effect for buttons and anchor buttons.
+- `footer-bundle.js` – Generated helper that wraps the JavaScript modules in a `<script>` block for inline use.
 
 ## Using the modules in Webflow
 
@@ -44,11 +45,16 @@ When you use the navigation module, add a `.no-js` class to the root element so 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/USERNAME/REPO@TAG/packages/reveal.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/USERNAME/REPO@TAG/packages/wipe-heading.css" />
 <script defer src="https://cdn.jsdelivr.net/gh/USERNAME/REPO@TAG/packages/wipe-heading.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/USERNAME/REPO@TAG/packages/cad-grid.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/USERNAME/REPO@TAG/packages/button-eclipse.css" />
 
 <!-- Or load everything at once -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/USERNAME/REPO@TAG/packages/bundle.css" />
 <script defer src="https://cdn.jsdelivr.net/gh/USERNAME/REPO@TAG/packages/wipe-heading.js"></script>
+<script defer src="https://cdn.jsdelivr.net/gh/USERNAME/REPO@TAG/packages/cad-grid.js"></script>
+
+<!-- Or inline both helpers at once by copying packages/footer-bundle.js into Webflow's footer -->
+<!-- (the generated file already includes the surrounding <script> tag) -->
 ```
 
 `bundle.css` only ships the combined styles. Load the helper script as well—either from jsDelivr or an uploaded Webflow asset—so
@@ -90,6 +96,20 @@ node scripts/build-bundle.js 001202510231145
 ```
 
 The script updates both the header comment and the `--sq-build` custom property so the live bundle always advertises the exact build you just generated. By default it uses SweQuant’s local time zone (CET/CEST) and prefixes the stamp with `001`, but you can override the prefix by exporting `SQ_BUILD_PREFIX=XYZ` before running the command.
+
+### Generating the footer helper bundle
+
+Run the companion script whenever you update any of the JavaScript helpers. It concatenates `wipe-heading.js` and `cad-grid.js` into `packages/footer-bundle.js`, stamps the build, and wraps everything in a ready-to-paste `<script>` element for Webflow’s footer area.
+
+```bash
+# Auto-generate a fresh footer bundle with the current timestamp
+node scripts/build-footer-bundle.js auto
+
+# Or supply an explicit stamp (same format as the CSS bundler)
+node scripts/build-footer-bundle.js 001202510231145
+```
+
+When you deploy via jsDelivr, keep loading the individual helper files with `<script defer src="…">` tags because the generated bundle includes the `<script>` wrapper specifically for inline use. Copy the contents of `packages/footer-bundle.js` verbatim into Webflow’s Project Settings → Custom Code → Footer to inline both helpers in one block.
 
 To rebuild the bundle automatically after every `git merge`, link the helper hook that ships with the repository:
 
