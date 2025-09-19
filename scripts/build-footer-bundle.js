@@ -6,6 +6,9 @@ const { resolveStamp } = require('./build-stamp');
 
 const modules = [
   'wipe-heading.js',
+  'reveal-controller.js',
+  'nav-entrance.js',
+  'nav-active-link.js',
   'cad-grid.js'
 ];
 
