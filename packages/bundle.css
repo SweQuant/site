@@ -1,8 +1,8 @@
 <style>
-/*! SweQuant bundle.css | build: 2025-09-19-2229 */
+/*! SweQuant bundle.css | build: 001202509200035 */
 
 /* build stamp */
-:root { --sq-build: "2025-09-19-2229"; }
+:root { --sq-build: "001202509200035"; }
 
 /* === vars-anchor.css === */
 /* Vars & anchor offset */
@@ -137,8 +137,8 @@ html { scroll-padding-top: calc(var(--nav-top) + var(--nav-h) + 8px); }
 /* === reveal.css === */
 /* Block reveal */
 .reveal,.reveal-btn{ opacity:0; transform:translateY(10px); filter:blur(2px); }
-.reveal.in{ animation:rise 560ms cubic-bezier(.25,.55,.25,1) forwards; animation-delay:var(--d,0ms); }
-.reveal-btn.in{ animation:rise 700ms cubic-bezier(.25,.55,.25,1) forwards; animation-delay:var(--d,0ms); }
+.reveal.in{ animation-name:rise; animation-duration:var(--dur,560ms); animation-timing-function:cubic-bezier(.25,.55,.25,1); animation-fill-mode:forwards; animation-delay:var(--d,0ms); }
+.reveal-btn.in{ animation-name:rise; animation-duration:var(--dur,700ms); animation-timing-function:cubic-bezier(.25,.55,.25,1); animation-fill-mode:forwards; animation-delay:var(--d,0ms); }
 .reveal-btn.in:hover{ transform:translateY(-1px) scale(1.01); }
 @keyframes rise{ from{opacity:0;transform:translateY(10px);filter:blur(2px)} to{opacity:1;transform:translateY(0);filter:blur(0)} }
 @media (prefers-reduced-motion:reduce){
