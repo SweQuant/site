@@ -6,5 +6,12 @@
   animation:wipe-rise var(--wipe-dur,900ms) cubic-bezier(.25,.55,.25,1) forwards;
   animation-delay:calc(var(--d,0ms) + var(--lead,160ms));
 }
+.wipe-word--chunked .wipe-inner{ display:inline-flex; transform:none; opacity:1; will-change:auto; }
+.wipe-word--chunked.in .wipe-inner{ animation:none; }
+.wipe-word--chunked .wipe-chunk{ display:inline-block; transform:translateY(110%); opacity:.001; will-change:transform,opacity; }
+.wipe-word--chunked.in .wipe-chunk{
+  animation:wipe-rise var(--wipe-dur,900ms) cubic-bezier(.25,.55,.25,1) forwards;
+  animation-delay:calc(var(--d,0ms) + var(--lead,160ms) + var(--i) * var(--step,50ms));
+}
 @keyframes wipe-rise{ 0%{transform:translateY(110%);opacity:.001} 65%{transform:translateY(0);opacity:1} 100%{transform:translateY(0);opacity:1} }
 [data-wipe-words].reveal{ opacity:1; transform:none; filter:none; }

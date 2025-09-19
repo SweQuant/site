@@ -43,6 +43,7 @@ When you use the navigation module, add a `.no-js` class to the root element so 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/USERNAME/REPO@TAG/packages/bg-nonlinear.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/USERNAME/REPO@TAG/packages/reveal.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/USERNAME/REPO@TAG/packages/wipe-heading.css" />
+<script defer src="https://cdn.jsdelivr.net/gh/USERNAME/REPO@TAG/packages/wipe-heading.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/USERNAME/REPO@TAG/packages/button-eclipse.css" />
 
 <!-- Or load everything at once -->
@@ -58,6 +59,16 @@ To enable the animated CAD background, load the standalone script and make sure 
 ```
 
 The script auto-initialises on `DOMContentLoaded`, so no inline bootstrapping code is required.
+
+### Wipe heading animation helper
+
+The chunking helper scans every `[data-wipe-words]` element, preserves the original label for screen readers, and wraps the text in `.wipe-chunk` spans so each chunk can animate with a staggered delay.
+
+```html
+<script defer src="https://cdn.jsdelivr.net/gh/USERNAME/REPO@TAG/packages/wipe-heading.js"></script>
+```
+
+Include the script once per page, ideally alongside the stylesheet link in the global head snippet.
 
 ### Maintaining the bundle build stamp
 
