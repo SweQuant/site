@@ -1,0 +1,13 @@
+/* Glass surface utility */
+.glass-surface{
+  background:
+    radial-gradient(120% 220% at 50% 50%,
+      rgba(255,255,255,.24) 0%,
+      rgba(255,255,255,.20) 55%,
+      rgba(255,255,255,.16) 80%,
+      rgba(255,255,255,.08) 100%) !important;
+  border:1px solid rgba(255,255,255,.32) !important;
+  backdrop-filter: blur(1.6px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(1.6px) saturate(160%) !important;
+  border-radius:18px;
+}

@@ -5,6 +5,7 @@ const path = require('path');
 const modules = [
   'vars-anchor.css',
   'nav.css',
+  'glass-surface.css',
   'cad-grid.css',
   'bg-nonlinear.css',
   'reveal.css',
