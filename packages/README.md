@@ -17,6 +17,22 @@ If you prefer to load a single stylesheet, use `bundle.css`. It contains every m
 
 Add one `<link>` tag per module inside **Project Settings → Custom Code → Head**. This keeps the modules independent so you can deploy surgical updates without touching the others.
 
+When you use the navigation module, add a `.no-js` class to the root element so the fallback styles only apply when scripting is unavailable. Remove the class in the very first inline script block so JavaScript-driven entrance animations can take over immediately after the HTML loads.
+
+```html
+<html class="no-js">
+  <head>
+    <script>
+      document.documentElement.classList.remove('no-js');
+    </script>
+    <!-- link tags continue here -->
+  </head>
+  <body>
+    <!-- page markup -->
+  </body>
+</html>
+```
+
 ```html
 <!-- Required shared variables -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/USERNAME/REPO@TAG/packages/vars-anchor.css" />
