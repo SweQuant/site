@@ -5,13 +5,8 @@ const path = require('path');
 const { resolveStamp } = require('./build-stamp');
 
 const modules = [
-  'vars-anchor.css',
-  'nav.css',
-  'cad-grid.css',
-  'bg-nonlinear.css',
-  'reveal.css',
-  'wipe-heading.css',
-  'button-eclipse.css'
+  'wipe-heading.js',
+  'cad-grid.js'
 ];
 
 async function main() {
@@ -23,26 +18,26 @@ async function main() {
     process.exit(1);
     return;
   }
-  const bundleHeader = `/*! SweQuant bundle.css | build: ${stamp} */`;
-  const buildToken = `:root { --sq-build: "${stamp}"; }`;
+
+  const bundleHeader = `/*! SweQuant footer-bundle.js | build: ${stamp} */`;
 
   const repoRoot = path.resolve(__dirname, '..');
   const packagesDir = path.join(repoRoot, 'packages');
 
-  const sections = [bundleHeader, '', '/* build stamp */', buildToken, ''];
+  const sections = [bundleHeader, ''];
 
   for (const file of modules) {
     const filePath = path.join(packagesDir, file);
-    const css = await fs.readFile(filePath, 'utf8');
-    sections.push(`/* === ${file} === */`);
-    sections.push(css.trimEnd());
+    const js = await fs.readFile(filePath, 'utf8');
+    sections.push(`// === ${file} ===`);
+    sections.push(js.trimEnd());
     sections.push('');
   }
 
   const output = sections.join('\n').replace(/\n{3,}/g, '\n\n');
-  const wrappedOutput = ['<style>', output, '</style>'].join('\n');
-  const bundlePath = path.join(packagesDir, 'bundle.css');
-  await fs.writeFile(bundlePath, wrappedOutput + '\n', 'utf8');
+  const wrappedOutput = ['<script>', output, '</script>'].join('\n');
+  const bundlePath = path.join(packagesDir, 'footer-bundle.js');
+  await fs.writeFile(bundlePath, `${wrappedOutput}\n`, 'utf8');
   console.log(`Wrote ${bundlePath} with build ${stamp}`);
 }
 
