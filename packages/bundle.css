@@ -1,8 +1,8 @@
 <style>
-/*! SweQuant bundle.css | build: 2025-09-19-2019 */
+/*! SweQuant bundle.css | build: 001202509192238 */
 
 /* build stamp */
-:root { --sq-build: "2025-09-19-2019"; }
+:root { --sq-build: "001202509192238"; }
 
 /* === vars-anchor.css === */
 /* Vars & anchor offset */
@@ -163,6 +163,18 @@ html { scroll-padding-top: calc(var(--nav-top) + var(--nav-h) + 8px); }
 }
 @keyframes wipe-rise{ 0%{transform:translateY(110%);opacity:.001} 65%{transform:translateY(0);opacity:1} 100%{transform:translateY(0);opacity:1} }
 [data-wipe-words].reveal{ opacity:1; transform:none; filter:none; }
+
+@media (prefers-reduced-motion: reduce){
+  .wipe-word,
+  .wipe-inner,
+  .wipe-chunk,
+  .wipe-word .wipe-inner,
+  .wipe-word .wipe-chunk{
+    animation:none !important;
+    transform:none !important;
+    opacity:1 !important;
+  }
+}
 
 /* === button-eclipse.css === */
 /* Button eclipse hover */
