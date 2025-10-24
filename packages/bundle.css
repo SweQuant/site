@@ -156,8 +156,8 @@ html { scroll-padding-top: calc(var(--nav-top) + var(--nav-h) + 8px); }
   display:inline-block;
   overflow:hidden;
   vertical-align:baseline;
-  padding:.2em 0;
-  margin:-.2em 0;
+  padding:.2em .05em;
+  margin:-.2em -.05em;
 }
 .wipe-word .wipe-inner{ display:inline-block; transform:translateY(110%); opacity:.001; will-change:transform,opacity; }
 .wipe-word.in .wipe-inner{
