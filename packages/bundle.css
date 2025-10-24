@@ -151,7 +151,14 @@ html { scroll-padding-top: calc(var(--nav-top) + var(--nav-h) + 8px); }
 /* === wipe-heading.css === */
 /* H1 word-by-word wipe */
 [data-wipe-words]{ display:inline }
-.wipe-word{ position:relative; display:inline-block; overflow:hidden; vertical-align:baseline; }
+.wipe-word{
+  position:relative;
+  display:inline-block;
+  overflow:hidden;
+  vertical-align:baseline;
+  padding:.2em 0;
+  margin:-.2em 0;
+}
 .wipe-word .wipe-inner{ display:inline-block; transform:translateY(110%); opacity:.001; will-change:transform,opacity; }
 .wipe-word.in .wipe-inner{
   animation:wipe-rise var(--wipe-dur,900ms) cubic-bezier(.25,.55,.25,1) forwards;
